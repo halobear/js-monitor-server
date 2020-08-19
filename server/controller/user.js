@@ -2,13 +2,15 @@ const jwtToken = require('../utils/jwtToken')
 
 async function login(ctx) {
   const { username, password } = ctx.request.body
-  if (username !== 'admin' || password !== 'admin') {
+  const { list = [] } = await mysql.list('kuan_manager', { password, username })
+  const [user] = list
+  if (!user) {
     ctx.throw(403, '改账号不存在')
   }
-  const user = { username }
-  const token = jwtToken(user)
+  const u = { username, id: user.id }
+  const token = jwtToken(u)
   user.token = token
-  ctx.state.data = user
+  ctx.state.data = u
 }
 
 function logout(ctx) {
