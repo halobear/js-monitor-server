@@ -2,7 +2,7 @@ const moment = require('moment')
 const mysql = require('../../utils/mysql')
 const dbName = 'halo_errors'
 
-const keys = ['type', 'desc', 'stack', 'from']
+const keys = ['type', 'brief', 'stack', 'from']
 
 module.exports = async (ctx) => {
   const { query = {} } = ctx

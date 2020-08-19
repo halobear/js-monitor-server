@@ -11,7 +11,7 @@
  Target Server Version : 50731
  File Encoding         : utf-8
 
- Date: 08/19/2020 14:02:00 PM
+ Date: 08/19/2020 19:16:34 PM
 */
 
 SET NAMES utf8;
@@ -26,7 +26,7 @@ CREATE TABLE `halo_errors` (
   `pid` varchar(20) NOT NULL,
   `uid` varchar(20) NOT NULL,
   `type` varchar(2) NOT NULL,
-  `desc` varchar(255) NOT NULL,
+  `brief` varchar(255) NOT NULL,
   `stack` varchar(255) NOT NULL,
   `from` varchar(255) NOT NULL,
   `create_time` datetime NOT NULL,
