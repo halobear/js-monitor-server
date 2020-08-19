@@ -1,10 +1,10 @@
 const moment = require('moment')
-const mysql = require('../utils/mysql')
+const mysql = require('../../utils/mysql')
 const dbName = 'halo_errors'
 
 const keys = ['type', 'desc', 'stack', 'from']
 
-exports.report = async (ctx) => {
+module.exports = async (ctx) => {
   const { query = {} } = ctx
   const create_time = moment().format('YYYY-MM-DD HH:mm:ss')
   const data = []

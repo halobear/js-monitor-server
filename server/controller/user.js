@@ -1,15 +1,20 @@
+const mysql = require('../utils/mysql')
 const jwtToken = require('../utils/jwtToken')
 
 async function login(ctx) {
   const { username, password } = ctx.request.body
-  const { list = [] } = await mysql.list('kuan_manager', { password, username })
+  if (!username || !password) {
+    ctx.throw(403, '请完善账号密码')
+  }
+
+  const { list = [] } = await mysql.list('halo_manage', { password, username })
   const [user] = list
   if (!user) {
-    ctx.throw(403, '改账号不存在')
+    ctx.throw(403, '账号不存在')
   }
-  const u = { username, id: user.id }
+  const u = { username, nickname: user.nickname, id: user.id, avatar: user.avatar }
   const token = jwtToken(u)
-  user.token = token
+  u.token = token
   ctx.state.data = u
 }
 

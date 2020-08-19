@@ -14,6 +14,7 @@ router.post('/login', controller.user.login)
 router.get('/logout', controller.user.logout)
 
 // 用户登陆
-router.get('/report', controller.monitor.report)
+router.get('/monitor/report', controller.monitor.report)
+router.get('/monitor/allList', controller.monitor.allList)
 
 module.exports = router
