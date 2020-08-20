@@ -19,10 +19,10 @@
     ip "^1.1.5"
     readline "^1.3.0"
 
-"@luzhongk/node-mysql@^1.1.0":
-  version "1.1.1"
-  resolved "https://registry.npm.taobao.org/@luzhongk/node-mysql/download/@luzhongk/node-mysql-1.1.1.tgz#5ba4109f09b1551b5c0d42c0928c6963d9a23d5d"
-  integrity sha1-W6QQnwmxVRtcDULAkoxpY9miPV0=
+"@luzhongk/node-mysql@^1.1.3":
+  version "1.1.3"
+  resolved "https://registry.npmjs.org/@luzhongk/node-mysql/-/node-mysql-1.1.3.tgz#0504e2e07c27b9c43c66ebea70314805f2aa3b9a"
+  integrity sha512-UI77mpVZ7R7gqzX/jfScZAuNb0yi5co5u/g2uEw/iaxHLdyWDj7mbXI3Drfj7Mz+Obgdn6rhL99p9hOLLa9f/Q==
   dependencies:
     knex "^0.20.2"
     moment "^2.24.0"

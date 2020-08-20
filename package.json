@@ -10,7 +10,7 @@
   "dependencies": {
     "@luzhongk/node-ding": "^1.1.1",
     "@luzhongk/node-logger": "^1.1.0",
-    "@luzhongk/node-mysql": "^1.1.0",
+    "@luzhongk/node-mysql": "^1.1.3",
     "chalk": "^4.1.0",
     "koa": "^2.13.0",
     "koa-bodyparser": "^4.2.1",
