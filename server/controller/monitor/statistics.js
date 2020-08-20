@@ -56,6 +56,45 @@ function fetchStartTime() {
   const sql = `SELECT create_time FROM ${table} ORDER BY create_time ASC LIMIT 1 OFFSET 0`
   return mysql.mysql.raw(sql)
 }
+// 获取各个类型总数
+function fetchTypesTotalTotals() {
+  const sql = `SELECT COUNT(type) as total, type FROM ${table} WHERE TO_DAYS(create_time) = TO_DAYS(NOW()) GROUP BY type`
+  return mysql.mysql.raw(sql)
+}
+// 获取10天运行错误echarts数据
+async function fetchJsErrorDatas() {
+  const sql = `SELECT count(id) as total, create_time FROM halo_errors WHERE type NOT IN (${assetIds}) AND date_sub(curdate(), INTERVAL 9 DAY) <= date(create_time) GROUP BY YEAR(create_time),MONTH(create_time),DAY(create_time)`
+  const [list = []] = await mysql.mysql.raw(sql)
+  const dateTotalMap = list.reduce((obj, item) => {
+    obj[moment(item.create_time).format('MM/DD')] = item.total
+    return obj
+  }, {})
+  const data = [...Array(10).keys()].map((i) => {
+    const date = moment().subtract(i, 'days').format('MM/DD')
+    return {
+      date,
+      total: dateTotalMap[date] || 0,
+    }
+  })
+  return data
+}
+// 获取10天资源错误echarts数据
+async function fetchAssetErrorDatas() {
+  const sql = `SELECT count(id) as total, create_time FROM halo_errors WHERE type IN (${assetIds}) AND date_sub(curdate(), INTERVAL 9 DAY) <= date(create_time) GROUP BY YEAR(create_time),MONTH(create_time),DAY(create_time)`
+  const [list = []] = await mysql.mysql.raw(sql)
+  const dateTotalMap = list.reduce((obj, item) => {
+    obj[moment(item.create_time).format('MM/DD')] = item.total
+    return obj
+  }, {})
+  const data = [...Array(10).keys()].map((i) => {
+    const date = moment().subtract(i, 'days').format('MM/DD')
+    return {
+      date,
+      total: dateTotalMap[date] || 0,
+    }
+  })
+  return data
+}
 
 // 统计结果缓存一分钟
 module.exports = async (ctx) => {
@@ -64,6 +103,9 @@ module.exports = async (ctx) => {
     return (ctx.state.data = oldStatistics)
   }
   const [[{ create_time: start_time } = {}] = []] = await fetchStartTime()
+  const [typesTotal = []] = ([] = await fetchTypesTotalTotals())
+  const jsErrorDatas = await fetchJsErrorDatas()
+  const assetErrorDatas = await fetchAssetErrorDatas()
   const res = await Promise.all([
     fetchJSErrorTotal(),
     fetchAssetErrorTotal(),
@@ -87,6 +129,9 @@ module.exports = async (ctx) => {
   const data = {
     start_time: moment(start_time).format('YYYY/MM/DD HH:mm:ss'),
     end_time: moment().format('YYYY/MM/DD HH:mm:ss'),
+    typesTotal,
+    jsErrorDatas,
+    assetErrorDatas,
   }
   res.forEach(([[{ total } = {}] = []] = [], i) => {
     const key = keys[i]
