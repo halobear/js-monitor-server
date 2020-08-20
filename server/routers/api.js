@@ -19,5 +19,6 @@ router.get('/monitor/projects', controller.monitor.projects)
 router.get('/monitor/allList', controller.monitor.allList)
 router.get('/monitor/jserrors', controller.monitor.jserrors)
 router.get('/monitor/loaderrors', controller.monitor.loaderrors)
+router.get('/monitor/statistics', controller.monitor.statistics)
 
 module.exports = router

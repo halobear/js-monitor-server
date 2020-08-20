@@ -1,13 +1,15 @@
 const sendError = require('../utils/sendError')
 
 module.exports = async function (ctx, next) {
+  const start = Date.now()
   try {
     await next()
     const { code, data = {}, info, error } = ctx.state
     ctx.body = ctx.body || {
       success: !code,
       data,
-      info: info || error,
+      time: `${Date.now() - start}ms`,
+      info: info || error || '成功',
     }
   } catch (e) {
     // catch 住全局的错误信息
@@ -18,7 +20,8 @@ module.exports = async function (ctx, next) {
 
     ctx.body = {
       success: false,
-      info,
+      time: `${Date.now() - start}ms`,
+      info: info || '未知错误',
     }
 
     // 发送错误报告
