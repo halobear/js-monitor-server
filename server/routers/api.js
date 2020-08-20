@@ -13,8 +13,9 @@ router.get('/404', controller.error.test404)
 router.post('/login', controller.user.login)
 router.get('/logout', controller.user.logout)
 
-// 用户登陆
+// 监控系统
 router.get('/monitor/report', controller.monitor.report)
+router.get('/monitor/projects', controller.monitor.projects)
 router.get('/monitor/allList', controller.monitor.allList)
 router.get('/monitor/jserrors', controller.monitor.jserrors)
 router.get('/monitor/loaderrors', controller.monitor.loaderrors)

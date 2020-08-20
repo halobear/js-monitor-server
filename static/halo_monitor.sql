@@ -11,7 +11,7 @@
  Target Server Version : 50731
  File Encoding         : utf-8
 
- Date: 08/19/2020 19:16:34 PM
+ Date: 08/20/2020 16:08:45 PM
 */
 
 SET NAMES utf8;
@@ -32,7 +32,7 @@ CREATE TABLE `halo_errors` (
   `create_time` datetime NOT NULL,
   `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=93 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=179 DEFAULT CHARSET=utf8mb4;
 
 -- ----------------------------
 --  Table structure for `halo_manage`
@@ -43,6 +43,7 @@ CREATE TABLE `halo_manage` (
   `username` varchar(50) NOT NULL,
   `nickname` varchar(50) NOT NULL,
   `password` varchar(20) NOT NULL,
+  `avatar` varchar(255) NOT NULL,
   `create_time` datetime NOT NULL,
   `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)

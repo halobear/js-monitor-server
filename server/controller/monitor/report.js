@@ -1,6 +1,6 @@
 const moment = require('moment')
 const mysql = require('../../utils/mysql')
-const dbName = 'halo_errors'
+const table = 'halo_errors'
 
 const keys = ['type', 'brief', 'stack', 'from']
 
@@ -22,5 +22,5 @@ module.exports = async (ctx) => {
     data.push(item)
   }
   ctx.type = 'image/png'
-  ctx.body = await mysql.mysql(dbName).insert(data)
+  ctx.body = await mysql.mysql(table).insert(data)
 }
