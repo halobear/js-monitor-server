@@ -3,6 +3,6 @@
  */
 const MysqlHelper = require('@luzhongk/node-mysql')
 
-const config = require('../config')
+const config = require('../constants/config')
 
 module.exports = new MysqlHelper(config.mysql)

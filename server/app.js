@@ -5,7 +5,7 @@ const jwt = require('koa-jwt')
 
 const routers = require('./routers')
 const logger = require('./middlewares/logger')
-const config = require('./config')
+const config = require('./constants/config')
 
 const app = new Koa()
 
