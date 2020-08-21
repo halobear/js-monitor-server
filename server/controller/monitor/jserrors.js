@@ -5,7 +5,7 @@ const { list } = require('../../utils/mysql')
 const table = 'halo_errors'
 
 module.exports = async (ctx) => {
-  let { page = 1, size = 1000 } = ctx.query
+  let { page = 1, size = 1000, pid = '' } = ctx.query
   page = page > 1 ? page : 1
   const getData = mysql
     .mysql(table)
@@ -14,12 +14,14 @@ module.exports = async (ctx) => {
     .limit(size)
     .offset((page - 1) * size)
     .whereNotIn('type', assetsTypes)
+    .andWhere('pid', pid)
     .orderBy('create_time', 'desc')
     .groupBy('brief')
   const getTotal = mysql
     .mysql(table)
     .countDistinct('brief as total')
     .whereNotIn('type', assetsTypes)
+    .andWhere('pid', pid)
   const [list, total] = await Promise.all([getData, getTotal])
 
   ctx.state.data = {

@@ -6,64 +6,63 @@ const mysql = require('../../utils/mysql')
 const { assetsTypes } = require('../../constants/monitor')
 const cache = require('../../utils/cache')
 
-const cacheKey = 'monitor_statistics'
 const table = 'halo_errors'
 
 const assetIds = assetsTypes.join(',')
 
 // 获取运行错误总数
-function fetchJSErrorTotal() {
-  const sql = `SELECT count(id) as total FROM ${table} WHERE type NOT IN (${assetIds})`
+function fetchJSErrorTotal(pid) {
+  const sql = `SELECT count(id) as total FROM ${table} WHERE type NOT IN (${assetIds}) AND pid = ${pid}`
   return mysql.mysql.raw(sql)
 }
 // 获取资源错误总数
-function fetchAssetErrorTotal() {
-  const sql = `SELECT count(id) as total FROM ${table} WHERE type IN (${assetIds})`
+function fetchAssetErrorTotal(pid) {
+  const sql = `SELECT count(id) as total FROM ${table} WHERE type IN (${assetIds}) AND pid = ${pid}`
   return mysql.mysql.raw(sql)
 }
 // 获取影响人数总数
-function fetchPersonEffetTotal() {
-  const sql = `SELECT COUNT(DISTINCT uid) as total FROM ${table} WHERE type NOT IN (${assetIds})`
+function fetchPersonEffetTotal(pid) {
+  const sql = `SELECT COUNT(DISTINCT uid) as total FROM ${table} WHERE type NOT IN (${assetIds}) AND pid = ${pid}`
   return mysql.mysql.raw(sql)
 }
 // 获取影响页面总数
-function fetchFromTotal() {
-  const sql = `SELECT COUNT(DISTINCT \`from\`) as total FROM ${table}`
+function fetchFromTotal(pid) {
+  const sql = `SELECT COUNT(DISTINCT \`from\`) as total FROM ${table} WHERE pid = ${pid}`
   return mysql.mysql.raw(sql)
 }
 // 获取今日运行错误
-function fetchJSErrorTodayTotal() {
-  const sql = `SELECT count(id) as total FROM ${table} WHERE type NOT IN (${assetIds}) AND TO_DAYS(create_time) = TO_DAYS(NOW())`
+function fetchJSErrorTodayTotal(pid) {
+  const sql = `SELECT count(id) as total FROM ${table} WHERE type NOT IN (${assetIds}) AND TO_DAYS(create_time) = TO_DAYS(NOW()) AND pid = ${pid}`
   return mysql.mysql.raw(sql)
 }
 // 获取今日资源错误
-function fetchAssetErrorTodayTotal() {
-  const sql = `SELECT count(id) as total FROM ${table} WHERE type IN (${assetIds}) AND TO_DAYS(create_time) = TO_DAYS(NOW())`
+function fetchAssetErrorTodayTotal(pid) {
+  const sql = `SELECT count(id) as total FROM ${table} WHERE type IN (${assetIds}) AND TO_DAYS(create_time) = TO_DAYS(NOW()) AND pid = ${pid}`
   return mysql.mysql.raw(sql)
 }
 // 获取今日受影响人数
-function fetchPersonEffetTodayTotal() {
-  const sql = `SELECT COUNT(DISTINCT uid) as total FROM ${table} WHERE TO_DAYS(create_time) = TO_DAYS(NOW());`
+function fetchPersonEffetTodayTotal(pid) {
+  const sql = `SELECT COUNT(DISTINCT uid) as total FROM ${table} WHERE TO_DAYS(create_time) = TO_DAYS(NOW()) AND pid = ${pid}`
   return mysql.mysql.raw(sql)
 }
 // 获取今日受影响页面
-function fetchFromTodayTotal() {
-  const sql = `SELECT COUNT(DISTINCT \`from\`) as total FROM ${table} WHERE TO_DAYS(create_time) = TO_DAYS(NOW())`
+function fetchFromTodayTotal(pid) {
+  const sql = `SELECT COUNT(DISTINCT \`from\`) as total FROM ${table} WHERE TO_DAYS(create_time) = TO_DAYS(NOW()) AND pid = ${pid}`
   return mysql.mysql.raw(sql)
 }
 // 获取最旧时间
-function fetchStartTime() {
-  const sql = `SELECT create_time FROM ${table} ORDER BY create_time ASC LIMIT 1 OFFSET 0`
+function fetchStartTime(pid) {
+  const sql = `SELECT create_time FROM ${table} WHERE pid = ${pid} ORDER BY create_time ASC LIMIT 1 OFFSET 0`
   return mysql.mysql.raw(sql)
 }
 // 获取各个类型总数
-function fetchTypesTotalTotals() {
-  const sql = `SELECT COUNT(type) as total, type FROM ${table} WHERE TO_DAYS(create_time) = TO_DAYS(NOW()) GROUP BY type`
+function fetchTypesTotalTotals(pid) {
+  const sql = `SELECT COUNT(type) as total, type FROM ${table} WHERE TO_DAYS(create_time) = TO_DAYS(NOW()) AND pid = ${pid} GROUP BY type AND pid = ${pid}`
   return mysql.mysql.raw(sql)
 }
 // 获取10天运行错误echarts数据
-async function fetchJsErrorDatas() {
-  const sql = `SELECT count(id) as total, create_time FROM halo_errors WHERE type NOT IN (${assetIds}) AND date_sub(curdate(), INTERVAL 9 DAY) <= date(create_time) GROUP BY YEAR(create_time),MONTH(create_time),DAY(create_time)`
+async function fetchJsErrorDatas(pid) {
+  const sql = `SELECT count(id) as total, create_time FROM halo_errors WHERE type NOT IN (${assetIds}) AND date_sub(curdate(), INTERVAL 9 DAY) <= date(create_time) GROUP BY YEAR(create_time),MONTH(create_time),DAY(create_time) AND pid = ${pid}`
   const [list = []] = await mysql.mysql.raw(sql)
   const dateTotalMap = list.reduce((obj, item) => {
     obj[moment(item.create_time).format('MM/DD')] = item.total
@@ -79,8 +78,8 @@ async function fetchJsErrorDatas() {
   return data
 }
 // 获取10天资源错误echarts数据
-async function fetchAssetErrorDatas() {
-  const sql = `SELECT count(id) as total, create_time FROM halo_errors WHERE type IN (${assetIds}) AND date_sub(curdate(), INTERVAL 9 DAY) <= date(create_time) GROUP BY YEAR(create_time),MONTH(create_time),DAY(create_time)`
+async function fetchAssetErrorDatas(pid) {
+  const sql = `SELECT count(id) as total, create_time FROM halo_errors WHERE type IN (${assetIds}) AND date_sub(curdate(), INTERVAL 9 DAY) <= date(create_time) GROUP BY YEAR(create_time),MONTH(create_time),DAY(create_time) AND pid = ${pid}`
   const [list = []] = await mysql.mysql.raw(sql)
   const dateTotalMap = list.reduce((obj, item) => {
     obj[moment(item.create_time).format('MM/DD')] = item.total
@@ -98,23 +97,29 @@ async function fetchAssetErrorDatas() {
 
 // 统计结果缓存一分钟
 module.exports = async (ctx) => {
+  let { pid = '' } = ctx.query
+  if (!pid) {
+    ctx.throw(400, '请选择项目')
+  }
+  pid = `'${pid}'`
+  const cacheKey = `monitor_statistics-${pid}`
   const oldStatistics = cache.get(cacheKey)
   if (oldStatistics) {
     return (ctx.state.data = oldStatistics)
   }
-  const [[{ create_time: start_time } = {}] = []] = await fetchStartTime()
-  const [typesTotal = []] = ([] = await fetchTypesTotalTotals())
-  const jsErrorDatas = await fetchJsErrorDatas()
-  const assetErrorDatas = await fetchAssetErrorDatas()
+  const [[{ create_time: start_time } = {}] = []] = await fetchStartTime(pid)
+  const [typesTotal = []] = ([] = await fetchTypesTotalTotals(pid))
+  const jsErrorDatas = await fetchJsErrorDatas(pid)
+  const assetErrorDatas = await fetchAssetErrorDatas(pid)
   const res = await Promise.all([
-    fetchJSErrorTotal(),
-    fetchAssetErrorTotal(),
-    fetchPersonEffetTotal(),
-    fetchFromTotal(),
-    fetchJSErrorTodayTotal(),
-    fetchAssetErrorTodayTotal(),
-    fetchPersonEffetTodayTotal(),
-    fetchFromTodayTotal(),
+    fetchJSErrorTotal(pid),
+    fetchAssetErrorTotal(pid),
+    fetchPersonEffetTotal(pid),
+    fetchFromTotal(pid),
+    fetchJSErrorTodayTotal(pid),
+    fetchAssetErrorTodayTotal(pid),
+    fetchPersonEffetTodayTotal(pid),
+    fetchFromTodayTotal(pid),
   ])
   const keys = [
     'jsErrorTotal',
