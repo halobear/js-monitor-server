@@ -1,13 +1,14 @@
 /*
  * @Description: 钉钉发送模板消息推送
  * @Date: 2019-06-12 13:21:39
- * @LastEditTime: 2020-06-25 16:34:38
+ * @LastEditTime: 2020-08-22 13:08:50
  */
 const Ding = require('@luzhongk/node-ding')
+const { ding: options } = require('../constants/config')
 
 const ding = new Ding({
-  access_token: 'addc88e7fdd25f7757b2afe31ca029c1c4f995511831fd195d72619db486e0b6',
-  secret: 'SEC66666e1dd75f6ed3d24b481da985e82509df4acec8da2dea523a2895c4e90805',
+  access_token: options.access_token,
+  secret: options.secret,
 })
 
 /**
