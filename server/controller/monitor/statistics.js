@@ -57,12 +57,12 @@ function fetchStartTime(pid) {
 }
 // 获取各个类型总数
 function fetchTypesTotalTotals(pid) {
-  const sql = `SELECT COUNT(type) as total, type FROM ${table} WHERE TO_DAYS(create_time) = TO_DAYS(NOW()) AND pid = ${pid} GROUP BY type AND pid = ${pid}`
+  const sql = `SELECT COUNT(type) as total, type FROM ${table} WHERE TO_DAYS(create_time) = TO_DAYS(NOW()) AND pid = ${pid} GROUP BY type`
   return mysql.mysql.raw(sql)
 }
 // 获取10天运行错误echarts数据
 async function fetchJsErrorDatas(pid) {
-  const sql = `SELECT count(id) as total, create_time FROM halo_errors WHERE type NOT IN (${assetIds}) AND date_sub(curdate(), INTERVAL 9 DAY) <= date(create_time) GROUP BY YEAR(create_time),MONTH(create_time),DAY(create_time) AND pid = ${pid}`
+  const sql = `SELECT count(id) as total, create_time FROM halo_errors WHERE type NOT IN (${assetIds}) AND date_sub(curdate(), INTERVAL 9 DAY) <= date(create_time) AND pid = ${pid} GROUP BY YEAR(create_time),MONTH(create_time),DAY(create_time)`
   const [list = []] = await mysql.mysql.raw(sql)
   const dateTotalMap = list.reduce((obj, item) => {
     obj[moment(item.create_time).format('MM/DD')] = item.total
@@ -79,7 +79,7 @@ async function fetchJsErrorDatas(pid) {
 }
 // 获取10天资源错误echarts数据
 async function fetchAssetErrorDatas(pid) {
-  const sql = `SELECT count(id) as total, create_time FROM halo_errors WHERE type IN (${assetIds}) AND date_sub(curdate(), INTERVAL 9 DAY) <= date(create_time) GROUP BY YEAR(create_time),MONTH(create_time),DAY(create_time) AND pid = ${pid}`
+  const sql = `SELECT count(id) as total, create_time FROM halo_errors WHERE type IN (${assetIds}) AND date_sub(curdate(), INTERVAL 9 DAY) <= date(create_time) AND pid = ${pid} GROUP BY YEAR(create_time),MONTH(create_time),DAY(create_time)`
   const [list = []] = await mysql.mysql.raw(sql)
   const dateTotalMap = list.reduce((obj, item) => {
     obj[moment(item.create_time).format('MM/DD')] = item.total
@@ -108,7 +108,7 @@ module.exports = async (ctx) => {
     return (ctx.state.data = oldStatistics)
   }
   const [[{ create_time: start_time } = {}] = []] = await fetchStartTime(pid)
-  const [typesTotal = []] = ([] = await fetchTypesTotalTotals(pid))
+  const [typesTotal = []] = await fetchTypesTotalTotals(pid)
   const jsErrorDatas = await fetchJsErrorDatas(pid)
   const assetErrorDatas = await fetchAssetErrorDatas(pid)
   const res = await Promise.all([

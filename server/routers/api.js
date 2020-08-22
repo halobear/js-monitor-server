@@ -13,12 +13,19 @@ router.get('/404', controller.error.test404)
 router.post('/login', controller.user.login)
 router.get('/logout', controller.user.logout)
 
-// 监控系统
+// 监控上报
 router.get('/monitor/report', controller.monitor.report)
+// 性能上报
+router.get('/monitor/report/performance', controller.monitor.performance)
+// 项目列表
 router.get('/monitor/projects', controller.monitor.projects)
+// 实时监控
 router.get('/monitor/allList', controller.monitor.allList)
+// js错误
 router.get('/monitor/jserrors', controller.monitor.jserrors)
+// 资源错误
 router.get('/monitor/loaderrors', controller.monitor.loaderrors)
+// 统计
 router.get('/monitor/statistics', controller.monitor.statistics)
 
 module.exports = router
