@@ -18,14 +18,16 @@ router.get('/monitor/report', controller.monitor.report)
 // 性能上报
 router.get('/monitor/report/performance', controller.monitor.performance)
 // 项目列表
-router.get('/monitor/projects', controller.monitor.projects)
+router.get('/monitor/projects', auth, controller.monitor.projects.list)
+// 项目删除
+router.delete('/monitor/projects', auth, controller.monitor.projects.delete)
 // 实时监控
-router.get('/monitor/allList', controller.monitor.allList)
+router.get('/monitor/allList', auth, controller.monitor.allList)
 // js错误
-router.get('/monitor/jserrors', controller.monitor.jserrors)
+router.get('/monitor/jserrors', auth, controller.monitor.jserrors)
 // 资源错误
-router.get('/monitor/loaderrors', controller.monitor.loaderrors)
+router.get('/monitor/loaderrors', auth, controller.monitor.loaderrors)
 // 统计
-router.get('/monitor/statistics', controller.monitor.statistics)
+router.get('/monitor/statistics', auth, controller.monitor.statistics)
 
 module.exports = router

@@ -3,70 +3,59 @@ const table = 'halo_errors'
 const perTable = 'halo_performance'
 
 const cache = require('../../utils/cache')
+const cacheKey = 'monitor_projects'
 
 function fetchProjects() {
-  return mysql
-    .mysql(table)
-    .count('pid as error')
-    .select(['pid', 'create_time'])
-    .orderBy('create_time')
-    .groupBy('pid')
+  const sql = `
+  SELECT
+    p.pid AS pid,
+    p.id,
+    p.pid,
+    MIN( p.create_time ) AS start_time,
+    MAX( p.create_time ) AS end_time,
+    AVG( p.white_time ) AS white_time,
+    AVG( p.load_time ) AS load_time,
+    AVG( p.dom_use_time ) AS dom_use_time,
+    AVG( p.redirect_time ) AS redirect_time,
+    AVG( p.response_time ) AS response_time,
+    AVG( p.dns_query_time ) AS dns_query_time,
+    AVG( p.dns_cache_time ) AS dns_cache_time,
+    AVG( p.tcp_time ) AS tcp_time,
+    COUNT( DISTINCT uid ) AS visitor_total,
+    IFNULL( r.total, 0 ) AS today_visitor_total,
+    IFNULL( s.total, 0 ) AS error,
+    IFNULL( t.total, 0 ) AS todayError
+  FROM
+    ${perTable} p
+    LEFT JOIN ( SELECT pid, COUNT( DISTINCT uid ) AS total FROM ${perTable} WHERE TO_DAYS( NOW( ) ) = TO_DAYS( create_time ) GROUP BY pid ) r ON p.pid = r.pid 	
+    LEFT JOIN ( SELECT pid, brief, COUNT( * ) AS total FROM ${table} GROUP BY pid ) s ON s.pid = p.pid
+    LEFT JOIN ( SELECT pid, COUNT( * ) AS total FROM ${table} WHERE TO_DAYS( NOW( ) ) = TO_DAYS( create_time ) GROUP BY pid ) t ON t.pid = p.pid 
+  GROUP BY
+    pid
+  `
+  return mysql.mysql.raw(sql)
 }
 
-async function fetchTodayErrorsMap() {
-  const errors = await mysql
-    .mysql(table)
-    .count('pid as total')
-    .select(['pid'])
-    .where(mysql.mysql.raw(`TO_DAYS(create_time) = TO_DAYS(NOW())`))
-    .orderBy('create_time')
-    .groupBy('pid')
-  const errorsMap = errors.reduce((obj, item) => {
-    obj[item.pid] = item.total || 0
-    return obj
-  }, {})
-  return errorsMap
-}
-
-async function getPerformanceByPid() {
-  const performanceList = await mysql
-    .mysql(perTable)
-    .avg('white_time as white_time')
-    .avg('load_time as load_time')
-    .avg('dom_use_time as dom_use_time')
-    .avg('redirect_time as redirect_time')
-    .avg('response_time as response_time')
-    .avg('dns_query_time as dns_query_time')
-    .avg('dns_cache_time as dns_cache_time')
-    .avg('tcp_time as tcp_time')
-    .select('pid')
-    .limit(300)
-    .offset(0)
-    .groupBy('pid')
-
-  const performanceMap = performanceList.reduce((obj, item) => {
-    obj[item.pid] = item
-    return obj
-  }, {})
-  return performanceMap
-}
-
-module.exports = async (ctx) => {
-  const key = 'monitor_projects'
-  const oldCache = cache.get(key)
-  if (oldCache) {
-    return (ctx.state.data = oldCache)
-  }
-  const [projects, errorsMap, performanceMap] = await Promise.all([
-    fetchProjects(),
-    fetchTodayErrorsMap(),
-    getPerformanceByPid(),
-  ])
-  projects.forEach((item) => {
-    item.todayError = errorsMap[item.pid] || 0
-    Object.assign(item, performanceMap[item.pid])
-  })
-  // 缓存1分钟
-  cache.set(key, projects, 1000 * 60)
-  ctx.state.data = projects
+module.exports = {
+  async list(ctx) {
+    const oldCache = cache.get(cacheKey)
+    if (oldCache) {
+      return (ctx.state.data = oldCache)
+    }
+    const [projects = []] = await fetchProjects()
+    // 缓存1分钟
+    cache.set(cacheKey, projects, 1000 * 60)
+    ctx.state.data = projects
+  },
+  async delete(ctx) {
+    const { pid } = await ctx.query
+    if (!pid) {
+      ctx.throw(400, '请选择项目')
+    }
+    ctx.state.data = await Promise.all([
+      mysql.mysql(table).where({ pid }).del(),
+      mysql.mysql(perTable).where({ pid }).del(),
+    ])
+    cache.del(cacheKey)
+  },
 }
