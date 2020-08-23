@@ -25,7 +25,7 @@ module.exports = async function (ctx, next) {
     }
 
     // 发送错误报告
-    if (ctx.status !== 401 || ctx.status !== 403) {
+    if (ctx.status !== 401 && ctx.status !== 403) {
       sendError(`${ctx.status || ''}错误：${info}\n来源：${ctx.headers.referer}\n接口：${ctx.url}`)
     }
   }
