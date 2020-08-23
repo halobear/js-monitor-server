@@ -100,7 +100,7 @@ async function fetchAssetErrorDatas(pid) {
 module.exports = async (ctx) => {
   let { pid = '' } = ctx.query
   if (!pid) {
-    ctx.throw(400, '请选择项目')
+    ctx.throw(403, '请选择项目')
   }
   pid = `'${pid}'`
   const cacheKey = `monitor_statistics-${pid}`

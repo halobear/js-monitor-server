@@ -50,7 +50,7 @@ module.exports = {
   async delete(ctx) {
     const { pid } = await ctx.query
     if (!pid) {
-      ctx.throw(400, '请选择项目')
+      ctx.throw(403, '请选择项目')
     }
     ctx.state.data = await Promise.all([
       mysql.mysql(table).where({ pid }).del(),
