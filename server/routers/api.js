@@ -10,7 +10,7 @@ router.get('/403', controller.error.test403)
 router.get('/404', controller.error.test404)
 
 // 用户登陆
-router.post('/monitor/ogin', controller.user.login)
+router.post('/monitor/login', controller.user.login)
 router.get('/monitor/logout', controller.user.logout)
 
 // 监控上报
