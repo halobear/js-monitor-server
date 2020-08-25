@@ -28,8 +28,8 @@ function fetchProjects() {
   FROM
     ${perTable} p
     LEFT JOIN ( SELECT pid, COUNT( DISTINCT uid ) AS total FROM ${perTable} WHERE TO_DAYS( NOW( ) ) = TO_DAYS( create_time ) GROUP BY pid ) r ON p.pid = r.pid 	
-    LEFT JOIN ( SELECT pid, brief, COUNT( * ) AS total FROM ${table} GROUP BY pid ) s ON s.pid = p.pid
-    LEFT JOIN ( SELECT pid, COUNT( * ) AS total FROM ${table} WHERE TO_DAYS( NOW( ) ) = TO_DAYS( create_time ) GROUP BY pid ) t ON t.pid = p.pid 
+    LEFT JOIN ( SELECT pid, COUNT( * ) AS total FROM ${table} GROUP BY pid ) s ON s.pid = p.pid
+    LEFT JOIN ( SELECT pid, COUNT( DISTINCT uid ) AS total FROM ${table} WHERE TO_DAYS( NOW( ) ) = TO_DAYS( create_time ) GROUP BY pid ) t ON t.pid = p.pid 
   GROUP BY
     pid
   `
