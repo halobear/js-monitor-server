@@ -23,7 +23,7 @@ function fetchAssetErrorTotal(pid) {
 }
 // 获取影响人数总数
 function fetchPersonEffetTotal(pid) {
-  const sql = `SELECT COUNT(DISTINCT uid) as total FROM ${table} WHERE type NOT IN (${assetIds}) AND pid = ${pid}`
+  const sql = `SELECT COUNT(DISTINCT uid) as total FROM ${table} WHERE pid = ${pid}`
   return mysql.mysql.raw(sql)
 }
 // 获取影响页面总数
