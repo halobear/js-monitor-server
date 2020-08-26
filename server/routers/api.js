@@ -16,7 +16,9 @@ router.get('/monitor/logout', controller.user.logout)
 // 监控上报
 router.get('/monitor/report', controller.monitor.report)
 // 性能上报
-router.get('/monitor/report/performance', controller.monitor.performance)
+router.get('/monitor/report/performance', controller.monitor.performance.report)
+router.get('/monitor/performance/staticstics', controller.monitor.performance.statistics)
+router.get('/monitor/performance/list', controller.monitor.performance.list)
 // 项目列表
 router.get('/monitor/projects', auth, controller.monitor.projects.list)
 // 项目删除
